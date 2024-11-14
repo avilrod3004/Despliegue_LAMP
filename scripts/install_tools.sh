@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Verificar que se ha ejecutado primero el script para instalar y configurar LAMP
+if [ ! -f /var/log/lamp_installed.flag ]; then
+    echo "ERROR: El entorno LAMP no está instalado. Ejecute primero el script "install_lamp.sh"." >&2
+    exit 1
+fi
+
 # Cargar variables de entorno desde .env
 if [ -f .env ]; then
     source .env
@@ -29,6 +35,9 @@ mensaje_error() {
     fi
 }
 
+
+# phpMyAdmin
+
 # Preseleccionar las opciones
 # Seleccionar el servidor web -> apache2
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
@@ -52,3 +61,20 @@ sudo systemctl restart apache2
 mensaje_error "Falló al reiniciar Apache después de instalar phpMyAdmin."
 
 echo "¡phpMyAdmin instalado y configurado!"
+echo "Para acceder a la interfaz web -> http://ip/phpmyadmin"
+
+
+# Adminer
+# Crear directorio
+mkdir -p /var/www/html/adminer
+mensaje_error "No se ha podido crear la carpeta para guardar el archivo de Adminer"
+
+# Descargar el archivo, indicando la ruta donde se va a guardar
+wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql.php -P /var/www/html/adminer
+mensaje_error "Ha ocurrido un fallo al descargar el archivo de Adminer"
+
+echo "¡Adminer instalado correctamente!"
+echo "Para acceder a la interfaz web -> http://ip/adminer.php"
+
+
+# GoAccess

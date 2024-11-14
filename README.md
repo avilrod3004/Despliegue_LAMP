@@ -92,3 +92,14 @@ Confirmar que queremos usar `dbconfig-common` para configurar la base de datos.
 Por último, pedirá una contraseá para phpMyAdmin.
 
 Podemos acceder a la interfaz web de phpMyAdmin desde la URL `http://ip/phpmyadmin`. La IP será la dirección IP de la máquina.
+
+# Instalación de Adminer
+Crear carpeta en el directorio `/var/www/html`:
+```bash
+mkdir -p /var/www/html/adminer
+```
+
+Descargar el archivo de Adminer:
+```bash
+wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql.php -P /var/www/html/adminer
+```

@@ -89,3 +89,6 @@ sudo systemctl restart apache2
 mensaje_error "Falló al reiniciar Apache después de instalar PHP."
 
 echo "¡LAMP instalado y configurado!"
+
+# Fichero de control
+touch /var/log/lamp_installed.flag

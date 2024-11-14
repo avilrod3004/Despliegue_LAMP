@@ -78,3 +78,17 @@ Reiniciar Apache para que se apliquen los cambios:
 ```bash
 sudo systemctl restart apache2
 ```
+
+# Instalación de phpMyAdmin
+Instalación:
+```bash
+sudo apt install phpmyadmin php-mbstring php-zip php-gd php-json php-curl -y
+```
+
+Durante el proceso de la instalación aparece una ventana para elegir que servidor web configurar para ejecutar phpMyAdmin. En este caso elegir el servidor web apache2.
+
+Confirmar que queremos usar `dbconfig-common` para configurar la base de datos.
+
+Por último, pedirá una contraseá para phpMyAdmin.
+
+Podemos acceder a la interfaz web de phpMyAdmin desde la URL `http://ip/phpmyadmin`. La IP será la dirección IP de la máquina.

@@ -30,7 +30,6 @@ fi
 mensaje_error() {
     if [ $? -ne 0 ]; then
         echo "ERROR: $1" >&2
-        echo "Comando donde ha fallado: ${BASH_COMMAND}" >&2
         exit 1 # En caso de error termina la ejecución del script
     fi
 }
@@ -72,6 +71,10 @@ mensaje_error "No se ha podido crear la carpeta para guardar el archivo de Admin
 # Descargar el archivo, indicando la ruta donde se va a guardar
 wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql.php -P /var/www/html/adminer
 mensaje_error "Ha ocurrido un fallo al descargar el archivo de Adminer"
+
+# Renombrar el archivo descargado de Adminer a un nombre estándar
+mv /var/www/html/adminer/adminer-*.php /var/www/html/adminer/adminer.php
+mensaje_error "No se pudo renombrar el archivo de Adminer."
 
 echo "¡Adminer instalado correctamente!"
 echo "Para acceder a la interfaz web -> http://ip/adminer.php"

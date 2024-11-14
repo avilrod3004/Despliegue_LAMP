@@ -23,8 +23,7 @@ fi
 # Función para manejar errores
 mensaje_error() {
     if [ $? -ne 0 ]; then
-        echo "ERROR: $1" >&2
-        echo "Comando donde ha fallado: ${BASH_COMMAND}" >&2
+        echo "ERROR: $1." >&2
         exit 1 # En caso de error termina la ejecución del script
     fi
 }

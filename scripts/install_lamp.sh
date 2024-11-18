@@ -83,6 +83,13 @@ mensaje_error "No se pudieron aplicar los cambios de permisos."
 sudo apt install php libapache2-mod-php php-mysql -y
 mensaje_error "La instalación de los paquetes de PHP ha fallado."
 
+# Crear archivo de prueba
+sudo cat > /var/www/html/info.php <<EOL
+<?php
+phpinfo();
+?>
+EOL
+
 # Reiniciar Apache para aplicar los cambios
 sudo systemctl restart apache2
 mensaje_error "Falló al reiniciar Apache después de instalar PHP."

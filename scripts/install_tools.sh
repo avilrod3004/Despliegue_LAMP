@@ -15,8 +15,8 @@ else
 fi
 
 # Validar que la variable está cargada
-if [[ -z "$PHPMYADMIN_APP_PASSWORD" ]]; then
-    echo "ERROR: La variable PHPMYADMIN_APP_PASSWORD no están definidas en .env" >&2
+if [[ -z "$PHPMYADMIN_APP_PASSWORD" || -z "$STATS_USERNAME" || -z "$STATS_PASSWORD" ]]; then
+    echo "ERROR: Las variables PHPMYADMIN_APP_PASSWORD, STATS_USERNAME o STATS_PASSWORD no están definidas en .env" >&2
     exit 1
 fi
 
@@ -33,6 +33,16 @@ mensaje_error() {
         exit 1 # En caso de error termina la ejecución del script
     fi
 }
+
+
+# Actualizar repositorios y paquetes
+echo "Actualizando repositorios..."
+sudo apt update
+mensaje_error "Falló la actualización de repositorios."
+
+echo "Actualizando paquetes..."
+sudo apt upgrade -y
+mensaje_error "Falló la actualización de paquetes."
 
 
 # phpMyAdmin
@@ -59,9 +69,6 @@ mensaje_error "La instalación de phpMyAdmin o sus dependencias ha fallado."
 sudo systemctl restart apache2
 mensaje_error "Falló al reiniciar Apache después de instalar phpMyAdmin."
 
-echo "¡phpMyAdmin instalado y configurado!"
-echo "Para acceder a la interfaz web -> http://ip/phpmyadmin"
-
 
 # Adminer
 # Crear directorio
@@ -72,12 +79,54 @@ mensaje_error "No se ha podido crear la carpeta para guardar el archivo de Admin
 wget https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql.php -P /var/www/html/adminer
 mensaje_error "Ha ocurrido un fallo al descargar el archivo de Adminer"
 
-# Renombrar el archivo descargado de Adminer a un nombre estándar
+# Para evitar errores si la descarga falla
+if [ ! -f /var/www/html/adminer/adminer-*.php ]; then
+    mensaje_error "El archivo de Adminer no existe tras la descarga."
+fi
+
+# Renombrar el archivo descargado de Adminer a un nombre sencillo
 mv /var/www/html/adminer/adminer-*.php /var/www/html/adminer/adminer.php
 mensaje_error "No se pudo renombrar el archivo de Adminer."
 
+
+# GoAccess - Analizador de logs
+# Instalación
+sudo apt install goaccess -y
+mensaje_error "No se ha podido instalar GoAccess"
+
+# Crear directorio stats
+mkdir -p /var/www/html/stats
+mensaje_error "No se ha podido crear la carpeta stats"
+
+# Crear archivo de contraseñas
+sudo htpasswd -bc /etc/apache2/.htpasswd $STATS_USERNAME $STATS_PASSWORD
+mensaje_error "Ha ocurrido un fallo al crear el archivo de contraseñas"
+
+# Crear archivo .htaccess dentro del directorio que queremos proteger 
+# y añadir contenido
+sudo tee /var/www/html/stats/.htaccess > /dev/null <<EOL
+AuthType Basic
+AuthName "Acceso restringido"
+AuthBasicProvider file
+AuthUserFile "/etc/apache2/.htpasswd"
+Require valid-user
+EOL
+mensaje_error "Ha ocurrido un error al crear el archivo .htaccess o al escribit en él"
+
+# Editar archivo de configuración de Apache, añadir las líneas antes de la línea 20
+sudo awk 'NR==20 {print "<Directory \"/var/www/html/stats\">\n AllowOverride All\n</Directory>\n"} {print}' /etc/apache2/sites-available/000-default.conf > temp && sudo mv temp /etc/apache2/sites-available/000-default.conf
+mensaje_error "Ha ocurrido un fallo al editar el fichero de configuración de Apache"
+
+# Reinciar Apache
+sudo systemctl restart apache2
+mensaje_error "Ha ocurrido un error al reinciar apache para aplicar los cambios"
+
+
+# Mensajes finales
+echo "¡phpMyAdmin instalado y configurado!"
+echo "Para acceder a la interfaz web -> http://ip/phpmyadmin"
+
 echo "¡Adminer instalado correctamente!"
-echo "Para acceder a la interfaz web -> http://ip/adminer.php"
+echo "Para acceder a la interfaz web -> http://ip/adminer/adminer.php"
 
-
-# GoAccess
+echo "¡GoAccess configurado!"
